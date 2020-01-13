@@ -1,0 +1,53 @@
+<a href="#" class="js-colorlib-nav-toggle colorlib-nav-toggle"><i></i></a>
+<aside id="colorlib-aside" role="complementary" class="js-fullheight">
+    <nav id="colorlib-main-menu" role="navigation">
+        <ul>
+            {% if active == 'Home' %}
+                <li class="colorlib-active"><a href="/">Home</a></li>
+            {% else %}
+                <li><a href="/">Home</a></li>
+            {% endif %}
+            {% if active == 'About' %}
+                <li class="colorlib-active"><a href="/about">About</a></li>
+            {% else %}
+                <li><a href="/about">About</a></li>
+            {% endif %}
+            {% if active == 'Contact' %}
+                <li class="colorlib-active"><a href="/contact">Contact</a></li>
+            {% else %}
+                <li><a href="/contact">Contact</a></li>
+            {% endif %}
+            {% if active == 'Login' %}
+                {% if name %}
+                    <li class="colorlib-active"><a href="/login">{{ name }}</a></li>
+                {% else %}
+                    <li class="colorlib-active"><a href="/login">Login</a></li>
+                {% endif %}
+            {% else %}
+                {% if name %}
+                    <li><a href="/login">{{ name }}</a></li>
+                {% else %}
+                    <li><a href="/login">Login</a></li>
+                {% endif %}
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="colorlib-footer">
+        <h1 id="colorlib-logo" class="mb-4"><a href="/"
+                                               style="background-image: url(../static/images/bg_1.jpg);">Mrinal
+            <span>Singh</span></a></h1>
+        <div class="mb-4">
+            <h3>Subscribe for newsletter</h3>
+            <form action="#" class="colorlib-subscribe-form">
+                <div class="form-group d-flex">
+                    <div class="icon"><span class="icon-paper-plane"></span></div>
+                    <input type="text" class="form-control" placeholder="Enter Email Address">
+                </div>
+            </form>
+        </div>
+        <p class="pfooter">
+            Copyright &copy;<script>document.write(new Date().getFullYear());</script>
+        </p>
+    </div>
+</aside> <!-- END COLORLIB-ASIDE -->

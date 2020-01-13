@@ -1,0 +1,180 @@
+{% extends 'layout.html' %}
+{% block title %} Dashboard {% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='dcss/main.css') }}">
+    <style>
+        .success {
+            border: 2px #0b2e13;
+        }
+
+        .error {
+            border: 2px #71132a;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div id="colorlib-page">
+        {% with active = 'Login' %}
+            {% include 'navbar.html' %}
+        {% endwith %}
+        <div id="colorlib-main">
+            <section class="ftco-section contact-section px-md-4">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-10 mx-auto">
+                            <h1>Basic Actions</h1>
+                            <button class="btn btn-outline-dark" data-toggle="modal" data-target="#exampleModal">
+                                Add a new Category
+                            </button>
+                            <a href="/logout">
+                                <button class="btn btn-outline-danger"> Logout</button>
+                            </a>
+                            <hr>
+                            <div class="row">
+                                <h1>Manage Posts</h1>
+                                <a href="/edit/0">
+                                    <button class="btn btn-outline-primary"> Add a new post</button>
+                                </a>
+                            </div>
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Sno</th>
+                                    <th>Title</th>
+                                    <th>Date</th>
+                                    <th>Edit</th>
+                                    <th>Delete</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+
+                                {% for post in posts %}
+                                    <tr>
+                                        <td>{{ post.id }}</td>
+                                        <td>{{ post.title }}</td>
+                                        <td>{{ post.create }}</td>
+                                        <td><a href="/edit/{{ post.id }}">
+                                            <button class="btn btn-info">Edit</button>
+                                        </a></td>
+                                        <td><a href="/delete/{{ post.id }}">
+                                            <button class="btn btn-danger">Delete</button>
+                                        </a></td>
+                                    </tr>
+
+
+                                {% endfor %}
+
+
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="form">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title" id="exampleModalLabel" style="margin: 3%">Add Category</h5>
+                    <form class="needs-validation" novalidate>
+                        <div class="form-row" style="margin: 3%">
+                            <div class="col">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="catname" placeholder="Category Name"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row" style="margin: 3%">
+                            <div class="col">
+                                <input type="text" class="form-control mb-5" id="catslug" placeholder="Category Slug"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="form-row justify-content-end">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" style="margin: 1%">
+                                Close
+                            </button>
+                            <button type="button" id="addcategory" class="btn btn-primary" style="margin: 1%">Add
+                            </button>
+                        </div>
+                        <label id="result"></label>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script src="{{ url_for('static', filename='dcss.main,js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            //alert('ok');
+
+            $("#catname").keyup(function () {
+                xhttp = new XMLHttpRequest();
+                xhttp.open('GET', '/addcategory?op=searchcat&&catname=' + $('#catname').val(), true);
+                xhttp.onreadystatechange = function () {
+                    if (this.status == 200 && this.readyState == 4) {
+                        data = JSON.parse(this.responseText);
+                        if (data['result'] == 'ok') {
+                            document.getElementById("catname").className = "form-control is-valid";
+                        }
+                        if (data['result'] == 'error') {
+                            document.getElementById("catname").className = "form-control is-invalid";
+                        }
+                    }
+                };
+
+                xhttp.send();
+
+            });
+
+            $("#catslug").keyup(function () {
+                xhttp = new XMLHttpRequest();
+                xhttp.open('GET', '/addcategory?op=searchslug&&slug=' + $('#catslug').val(), true);
+                xhttp.onreadystatechange = function () {
+                    if (this.status == 200 && this.readyState == 4) {
+                        data = JSON.parse(this.responseText);
+                        if (data['result'] == 'ok') {
+                            document.getElementById("catslug").className = "form-control is-valid";
+                        }
+                        if (data['result'] == 'error') {
+                            document.getElementById("catslug").className = "form-control is-invalid";
+                        }
+                    }
+                };
+
+                xhttp.send();
+
+            });
+
+            $("#addcategory").click(function () {
+                xhttp = new XMLHttpRequest();
+                xhttp.open('GET', '/addcategory?op=add&&catname=' + $('#catname').val() + '&&catslug=' + $('#catslug').val(), true);
+                xhttp.onreadystatechange = function () {
+                    if (this.status == 200 && this.readyState == 4) {
+                        data = JSON.parse(this.responseText);
+                        document.getElementById("catname").innerHTML = ' ';
+                        document.getElementById("catslug").innerHTML = ' ';
+                        document.getElementById("result").innerHTML = data['result'];
+                    }
+                };
+
+                xhttp.send();
+
+            });
+
+
+        });
+    </script>
+
+{% endblock %}
+

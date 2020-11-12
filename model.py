@@ -2,20 +2,6 @@ from app import db
 from datetime import datetime
 
 
-class Admin(db.Model):
-    __tablename__ = 'admins'
-
-    aid = db.Column(db.Integer, primary_key=True)
-    userid = db.Column(db.String(10), unique=True)
-    name = db.Column(db.String(30))
-    contact = db.Column(db.String(10))
-    about = db.Column(db.String(100))
-    img = db.Column(db.String(100))
-    email = db.Column(db.String(50))
-    password = db.Column(db.String(256))
-    posts = db.relationship('Post', backref='writer')
-
-
 pcrel = db.Table('pcrel',
                  db.Column('post_id', db.Integer, db.ForeignKey('posts.pid')),
                  db.Column('cat_id', db.Integer, db.ForeignKey('categories.cid'))
@@ -47,6 +33,18 @@ class Post(db.Model):
 
     # posts = db.relationship('Post', secondary='posts', backref=db.backref('cats', lazy='dynamic'))
 
+class Admin(db.Model):
+    __tablename__ = 'admins'
+
+    aid = db.Column(db.Integer, primary_key=True)
+    userid = db.Column(db.String(10), unique=True)
+    name = db.Column(db.String(30))
+    contact = db.Column(db.String(10))
+    about = db.Column(db.String(100))
+    img = db.Column(db.String(100))
+    email = db.Column(db.String(50))
+    password = db.Column(db.String(256))
+    posts = db.relationship('Post', backref='writer')
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -65,7 +63,8 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20))
     email = db.Column(db.String(20))
-    content = db.Column(db.String(100))
+    subject = db.Column(db.String(50))
+    content = db.Column(db.String(200))
     time = db.Column(db.DateTime, default=datetime.now())
 
 

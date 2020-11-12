@@ -41,7 +41,7 @@
                                         <input type="text" class="form-control" placeholder="Title" id="title"
                                                name='title'
                                                required
-                                               data-validation-required-message="Please enter your name."
+                                               data-validation-required-message="Title is required!"
                                                value="{{ post.title }}">
                                         <p class="help-block text-danger"></p>
                                     </div>
@@ -68,18 +68,8 @@
                                         <input type="text" class="form-control" placeholder="Excerpt" id="excerpt"
                                                name="excerpt"
                                                required
-                                               data-validation-required-message="Please enter your email address."
+                                               data-validation-required-message="Excerpt is required"
                                                value="{{ post.excerpt }}">
-                                        <p class="help-block text-danger"></p>
-                                    </div>
-                                </div>
-                                <div class="control-group">
-                                    <div class="form-group col-xs-12 floating-label-form-group controls">
-                                        <label>Slug</label>
-                                        <input type="text" class="form-control" placeholder="Slug" name="slug" id="slug"
-                                               required
-                                               data-validation-required-message="Please enter your phone number."
-                                               value="{{ post.slug }}">
                                         <p class="help-block text-danger"></p>
                                     </div>
                                 </div>
@@ -89,7 +79,7 @@
                                         <textarea rows="10" class="form-control" placeholder="Content" name="content"
                                                   id="content"
                                                   required
-                                                  data-validation-required-message="Please enter a message.">{{ post.content }}</textarea>
+                                                  data-validation-required-message="Content is required.">{{ post.content }}</textarea>
                                     </div>
                                 </div>
 

@@ -1,9 +1,9 @@
 {
     "app_config":
     {
-      "database_uri": "mysql+pymysql://root:root@localhost:3306/techblog",
+      "database_uri": "mysql+pymysql://root:fvvypx1@localhost:3306/space",
       "fb_url":"https://facebook.com/sinmrinal",
-      "tw_url":"https://twitter.com/mrinaal_singh",
+      "tw_url":"https://twitter.com/sinmrinal",
       "ig_url": "https://instagram.com/sinmrinal",
       "gh_url": "https://github.com/sinmrinal",
       "upload_location":"static/postimg"

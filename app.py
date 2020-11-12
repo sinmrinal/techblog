@@ -35,6 +35,8 @@ def landing():
     return render_template('index.html', categories=categories, posts=posts)
 
 
+
+
 @app.route('/category/<string:catslug>')
 def category_lander(catslug):
     categories = Category.query.order_by(Category.name).all()
@@ -75,7 +77,7 @@ def login():
         userid = request.form.get('email')
         passwd = request.form.get('pass')
         detail = Admin.query.filter_by(userid=userid).first()
-        if userid in detail.userid and pwd_context.verify(passwd, detail.password):
+        if detail and userid in detail.userid and pwd_context.verify(passwd, detail.password):
             session['userid'] = userid
             session['password'] = passwd
             return redirect('/dashboard')
@@ -114,7 +116,6 @@ def edit(post_id):
             post.id = 'NEW'
             post.title = ''
             post.excerpt = ''
-            post.slug = ''
             post.content = ''
             post.photo = ''
             return render_template('edit.html', post=post, state='Add', name=detail.name, categories=categories,
@@ -138,7 +139,7 @@ def sender():
             title = request.form.get('title')
             category = request.form.get('category')
             excerpt = request.form.get('excerpt')
-            slug = request.form.get('slug')
+            slug = request.form.get('title').replace(" ", "-")
             content = request.form.get('content')
             # img_file = request.form.get('img_file')
             # img_file = base64.b64encode(img_file)
@@ -160,6 +161,12 @@ def sender():
                 return redirect('/dashboard', flash('Post Updated.'))
         else:
             return redirect('/login')
+
+@app.route('article/<string:slug>', methods=['GET'])
+def article(slug):
+    if 'userid' in session and session['userid'] == Admin.query.filter_by(userid=session['userid']).one().userid:
+        detail = Admin.query.filter_by(userid=session['userid']).one()
+        if 
 
 
 @app.route('/addcategory', methods=['GET', 'POST'])
@@ -199,6 +206,18 @@ def addCategory():
 
     return json.dumps(data)
 
+@app.route('/message', methods=['POST'])
+def message():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        subject = request.form['subject']
+        content = request.form['message']
+        message = Message(name=name, email=email, subject=subject, content=content)
+        db.session.add(message)
+        db.session.commit()
+        return json.dumps({'success': True})
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

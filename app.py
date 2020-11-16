@@ -1,3 +1,4 @@
+from os import name
 from flask import Flask, render_template, redirect, session, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from passlib.context import CryptContext
@@ -21,18 +22,25 @@ app.config['SQLALCHEMY_DATABASE_URI'] = from_json['database_uri']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+app.config['MAIL_SERVER'] = ''
+app.config['MAIL_PORT'] = ''
+app.config['MAIL_USERNAME'] = ''
+app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+
 from model import Admin, Category, Comment, Message, Post
 
 
 @app.route('/')
 def landing():
     categories = Category.query.order_by(Category.name).all()
-    posts = Post.query.all()
+    # posts = Post.query.all()
     if 'userid' in session and session['userid'] in Admin.query.filter_by(userid=session['userid']).first().userid:
         detail = Admin.query.filter_by(userid=session['userid']).first()
         if pwd_context.verify(session['password'], detail.password):
             return render_template('index.html', name=detail.name, categories=categories)
-    return render_template('index.html', categories=categories, posts=posts)
+    return render_template('index.html', categories=categories)
 
 
 
@@ -162,11 +170,14 @@ def sender():
         else:
             return redirect('/login')
 
-@app.route('article/<string:slug>', methods=['GET'])
+@app.route('/article/<string:slug>', methods=['GET'])
 def article(slug):
     if 'userid' in session and session['userid'] == Admin.query.filter_by(userid=session['userid']).one().userid:
         detail = Admin.query.filter_by(userid=session['userid']).one()
-        if 
+        post = Post.query.filter_by(slug=slug).one()
+        if post:
+            auther = Admin.query.filter_by(userid=post.userid).one()
+            render_template('single.html', name=detail.name, post=post, auther=auther)
 
 
 @app.route('/addcategory', methods=['GET', 'POST'])

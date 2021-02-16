@@ -1,0 +1,27 @@
+{
+  "name": "techblog",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "clint-install": "cd client && yarn",
+    "server-install": "cd server && yarn",
+    "client": "cd client && yarn start",
+    "server": "cd server && node dist/index.js",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sinmrinal/techblog.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sinmrinal/techblog/issues"
+  },
+  "homepage": "https://github.com/sinmrinal/techblog#readme",
+  "devDependencies": {
+    "concurrently": "^5.3.0"
+  }
+}

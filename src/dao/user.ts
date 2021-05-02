@@ -1,3 +1,4 @@
+
 import {
     Collection,
     Db,
@@ -34,8 +35,8 @@ export default class UsersDAO {
             return;
         }
         try {
-            users = await db.collection('users');
-            sessions = await db.collection('sessions');
+            users = db.collection('users');
+            sessions = db.collection('sessions');
         } catch (e) {
             console.error(
                 `Unable to establish collection handles in users data access object: ${e}`

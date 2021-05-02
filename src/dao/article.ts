@@ -24,7 +24,7 @@ export default class ArticlesDAO {
     static async injectDB(db: Db): Promise<void> {
         if (articles) return;
         try {
-            articles = await db.collection('articles');
+            articles = db.collection('articles');
         } catch (error) {
             console.error(
                 `Unable to establish a collection handle in articles data access object: ${error}`

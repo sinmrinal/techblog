@@ -18,7 +18,7 @@ export default class CommentsDAO {
             return;
         }
         try {
-            comments = await db.collection('comments');
+            comments = db.collection('comments');
         } catch (e) {
             console.error(
                 `Unable to establish collection handles in comments data access object: ${e}`

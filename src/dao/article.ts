@@ -1,5 +1,5 @@
-import {ObjectId} from 'bson';
-import {Collection, Db} from 'mongodb';
+import { ObjectId } from 'bson';
+import { Collection, Db } from 'mongodb';
 
 let articles: Collection;
 
@@ -16,8 +16,8 @@ export interface Article {
 }
 
 export interface DAOResponse {
-    success: boolean;
-    detail: Article | Article[] | string;
+    response: any | undefined;
+    error: Error | undefined
 }
 
 export default class ArticlesDAO {
@@ -37,25 +37,27 @@ export default class ArticlesDAO {
         page = 0,
         articlesPerPage = 10
     ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const article: Article[] = await articles.find(
-                {author: new ObjectId(authorID)},
-                {projection: {body: 0}, sort: {publishedOn: -1}})
+                { author: new ObjectId(authorID) },
+                { projection: { body: 0 }, sort: { publishedOn: -1 } })
                 .skip(page * articlesPerPage)
                 .limit(articlesPerPage)
                 .toArray();
 
-            return {success: true, detail: article};
-        } catch (error) {
-            console.error(`Unable to issue find command, ${error}`);
-            return {
-                success: false,
-                detail: 'Unable to retrieve articles at the moment.'
-            };
+            response = article;
+        } catch (err) {
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
     static async getArticleByID(id: string): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const pipeline = [
                 {
@@ -88,13 +90,11 @@ export default class ArticlesDAO {
                 }
             ];
             const article = await articles.aggregate(pipeline).toArray();
-            return {success: true, detail: article[0]};
-        } catch (error) {
-            console.error(`Something went wrong in getArticleByID: ${error}`);
-            return {
-                success: false,
-                detail: 'Unable to retrieve articles at the moment.'
-            };
+            response = article[0];
+        } catch (err) {
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
@@ -103,20 +103,20 @@ export default class ArticlesDAO {
         page = 0,
         articlesPerPage = 10
     ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const article: Article[] = await articles.find(
-                {category: category},
-                {projection: {body: 0}, sort: {publishedOn: -1}})
+                { category: category },
+                { projection: { body: 0 }, sort: { publishedOn: -1 } })
                 .skip(page * articlesPerPage)
                 .limit(articlesPerPage)
                 .toArray();
-            return {success: true, detail: article};
-        } catch (error) {
-            console.error(`Unable to issue find command, ${error}`);
-            return {
-                success: false,
-                detail: 'Unable to retrieve articles at the moment.'
-            };
+            response = article;
+        } catch (err) {
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
@@ -124,19 +124,19 @@ export default class ArticlesDAO {
         page = 0,
         articlesPerPage = 10
     ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const cursor: Article[] = await articles
-                .find({}, {projection: {body: 0}, sort: {publishedOn: -1}})
+                .find({}, { projection: { body: 0 }, sort: { publishedOn: -1 } })
                 .skip(page * articlesPerPage)
                 .limit(articlesPerPage)
                 .toArray();
-            return {success: true, detail: cursor};
-        } catch (error) {
-            console.error(`Unable to issue find command, ${error}`);
-            return {
-                success: false,
-                detail: 'Unable to retrieve articles at the moment.'
-            };
+            response = cursor;
+        } catch (err) {
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 }

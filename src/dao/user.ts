@@ -24,8 +24,8 @@ interface User {
 }
 
 interface DAOResponse {
-    success: boolean;
-    detail: User | Record<string, string> | string;
+    response: any | undefined;
+    error: Error | undefined;
 }
 
 export default class UsersDAO {
@@ -46,47 +46,51 @@ export default class UsersDAO {
     static async getUser(
         user: string
     ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             if (/\S+@\S+\.\S+/.test(user)) {
-                const userInfo: User | undefined = await users.findOne({email: user});
-                return userInfo ? {success: true, detail: userInfo} : {
-                    success: false,
-                    detail: `User with email: ${user} not found`
-                };
+                const userInfo: User | undefined = await users.findOne({
+                    email: user
+                });
+                response = userInfo;
             } else if (user.startsWith('@')) {
                 const userInfo: User | undefined = await users.findOne({
                     username: user
                 });
-                return userInfo ? {success: true, detail: userInfo} : {
-                    success: false,
-                    detail: `User with username: ${user} not found`
-                };
-            } else return {success: false, detail: 'Username or email is required.'};
+                response = userInfo;
+            } else throw Error('Username or email is required.');
         } catch (err) {
-            throw err;
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
     static async addUser(
         userInfo: User
     ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const insertResponse: InsertOneWriteOpResult<any> = await users.insertOne(
                 userInfo,
-                {w: 'majority'}
+                { w: 'majority' }
             );
-            return insertResponse.result.ok === 1
-                ? {success: true, detail: userInfo}
-                : {success: false, detail: 'Enable to add user.'};
+            if (insertResponse.result.ok === 1)
+                response = true;
+            else
+                throw Error('Enable to add user.');
         } catch (err) {
-            if (String(err.message).startsWith('MongoError: E11000 duplicate key error')) {
-                return {
-                    success: false,
-                    detail: 'A user with the given username or email already exists.'
-                };
-            }
-            console.error(`Error occurred while adding new user, ${err}.`);
-            return {success: false, detail: err.message};
+            // if (String(err.message).startsWith('MongoError: E11000 duplicate key error')) {
+            //     return {
+            //         success: false,
+            //         detail: 'A user with the given username or email already exists.'
+            //     };
+            // }
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
@@ -94,111 +98,142 @@ export default class UsersDAO {
         user: string,
         jwt: string
     ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const updateResponse: UpdateWriteOpResult = await sessions.updateOne(
-                {user: user},
-                {$set: {user: user, jwt: jwt}},
-                {upsert: true, w: 'majority'}
+                { user: user },
+                { $set: { user: user, jwt: jwt } },
+                { upsert: true, w: 'majority' }
             );
-            return updateResponse.result.ok === 1
-                ? {success: true, detail: {user: user, jwt: jwt}}
-                : {success: false, detail: 'Error occurred while logging in user'};
+            if (updateResponse.result.ok === 1)
+                response = { user: user, jwt: jwt };
+            else
+                throw Error('Error occurred while logging in user');
         } catch (err) {
-            console.error(`Error occurred while logging in user, ${err}`);
-            return {success: false, detail: err.message};
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
     static async logoutUser(
         email: string
     ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const deleteResponse: DeleteWriteOpResultObject = await sessions.deleteOne(
-                {user: email}
+                { user: email }
             );
-            return deleteResponse.result.ok == 1
-                ? {success: true, detail: email}
-                : {success: false, detail: 'Error occurred while logging out user'};
+            if (deleteResponse.result.ok === 1)
+                response = true;
+            else
+                throw new Error('Error occurred while logging out user');
         } catch (err) {
-            console.error(`Error occurred while logging out user, ${err}`);
-            return {success: false, detail: err.message};
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
     static async getUserSession(
         user: string
     ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const userSession: {
                 user: string;
                 jwt: string;
-            } = await sessions.findOne({user: user});
-            return userSession
-                ? {success: true, detail: userSession}
-                : {success: false, detail: 'No user session found with corresponding email.'};
+            } = await sessions.findOne({ user: user });
+            response = userSession;
         } catch (err) {
-            console.error(`Error occurred while retrieving user session, ${err}`);
-            return {success: false, detail: err.message};
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
     static async deleteUser(
         email: string
     ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const userDeleteResponse: DeleteWriteOpResultObject = await users.deleteOne(
-                {user: email}
+                { user: email }
             );
             const sessionDeleteResponse: DeleteWriteOpResultObject = await sessions.deleteOne(
-                {user: email}
+                { user: email }
             );
             if (userDeleteResponse.result.ok === 1 && sessionDeleteResponse.result.ok === 1) {
-                return {success: true, detail: email};
+                response = true;
             } else {
-                console.error('Unable to delete user');
-                return {success: false, detail: 'Unable to delete user'};
+                throw new Error('Unable to delete user');
             }
         } catch (err) {
-            console.error(`Error occurred while deleting user, ${err}`);
-            return {success: false, detail: err.message};
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
-    static async checkAdmin(email: string): Promise<boolean | Error> {
+    static async isAdmin(email: string): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
             const userInfo: DAOResponse = await this.getUser(email);
-            const user = userInfo.detail.
-            return userInfo.success ? userInfo.detail : false;
+            if (userInfo.error)
+                throw userInfo.error;
+            const user: User = userInfo.response;
+            response = user.isAdmin;
         } catch (err) {
-            return new Error(err);
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
-    static async checkUsernameAvailability(
+    static async isUsernameAvailable(
         username: string
-    ): Promise<boolean | object> {
+    ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
-            const user = await this.getUser(username);
-            return !user.success;
-        } catch (e) {
-            return {error: e};
+            const res = await this.getUser(username);
+            if (res.error)
+                throw res.error;
+            if (res.response)
+                response = false;
+            else
+                response = true;
+        } catch (err) {
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 
     static async addArticleToAuthor(
         username: string,
         articleID: string
-    ): Promise<DAOResponse | DAOFailureResponse> {
+    ): Promise<DAOResponse> {
+        let response = undefined;
+        let error = undefined;
         try {
-            const updateResponse: UpdateWriteOpResult = await users.updateOne(
-                {username: username},
-                {$push: {articles: new ObjectId(articleID)}}
+            const updateResponse: UpdateWriteOpResult | undefined = await users.updateOne(
+                { username: username },
+                { $push: { articles: new ObjectId(articleID) } }
             );
-            return updateResponse.result.ok
-                ? {success: true, detail: updateResponse.result}
-                : {success: false, error: 'No user with corresponding username.'};
-        } catch (e) {
-            return {success: false, error: e};
+            if (updateResponse.result.ok === 1)
+                response = updateResponse.result.ok === 1;
+            else
+                throw new Error('No user with corresponding username.');
+        } catch (err) {
+            error = err;
+        } finally {
+            return { response, error };
         }
     }
 }

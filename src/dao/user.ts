@@ -1,4 +1,3 @@
-
 import {
     Collection,
     Db,
@@ -7,27 +6,10 @@ import {
     ObjectId,
     UpdateWriteOpResult
 } from 'mongodb';
+import { User, DAOResponse } from './../util/globals';
 
 let users: Collection;
 let sessions: Collection;
-
-
-interface User {
-    username: string;
-    name: string;
-    email: string;
-    password: string;
-    bio: string;
-    joined: Date;
-    isAdmin: boolean;
-    avatar: string;
-    articles: string[];
-}
-
-interface DAOResponse {
-    response: any | undefined;
-    error: Error | undefined;
-}
 
 export default class UsersDAO {
     static async injectDB(db: Db): Promise<void> {
@@ -69,13 +51,21 @@ export default class UsersDAO {
     }
 
     static async addUser(
-        userInfo: User
+        username: string, name: string, email: string, password: string
     ): Promise<DAOResponse> {
         let response = undefined;
         let error = undefined;
         try {
+            const user = {
+                username: username,
+                email: email,
+                name: name,
+                password: password,
+                joined: new Date(),
+                isAdmin: false
+            };
             const insertResponse: InsertOneWriteOpResult<any> = await users.insertOne(
-                userInfo,
+                user,
                 { w: 'majority' }
             );
             if (insertResponse.result.ok === 1)
@@ -119,7 +109,7 @@ export default class UsersDAO {
     }
 
     static async logoutUser(
-        email: string
+        email: string, password: string
     ): Promise<DAOResponse> {
         let response = undefined;
         let error = undefined;
